@@ -199,9 +199,12 @@ def controler_archive(chemin: Path, racines: dict, eds: dict) -> dict:
             raise Defaut("le manifeste dit %s %s, le nom de fichier dit %s %s" % (man.get("id"), man.get("version"), mid, version))
         if man.get("confiance") == "interne":
             raise Defaut("la confiance « interne » est réservée aux modules livrés avec le noyau")
-        for k in ("nom", "description", "famille"):
+        for k in ("nom", "description"):
             if not str(man.get(k, "")).strip():
                 raise Defaut("le manifeste doit dire « %s »" % k)
+        section = str(man.get("section") or man.get("famille") or "").strip()      # « section » (nom actuel) ou « famille » (ancien nom)
+        if not section:
+            raise Defaut("le manifeste doit dire « section » (la rubrique où le module se range)")
         if man.get("importance") not in IMPORTANCES or not str(man.get("sans", "")).strip():
             raise Defaut("le manifeste doit déclarer « importance » (%s) et « sans » (ce qui s'arrête sans le module)" % ", ".join(IMPORTANCES))
         cles = {("cassandra-" + k): v for k, v in racines.items()}
@@ -216,7 +219,7 @@ def controler_archive(chemin: Path, racines: dict, eds: dict) -> dict:
             mm = re.match(r"^([a-z][a-z0-9_]{1,40})", str(x))
             if mm:
                 requiert.append(mm.group(1))
-        return {"id": mid, "nom": str(man["nom"])[:80], "version": version, "description": str(man["description"]).strip()[:500], "famille": str(man.get("famille", ""))[:40],
+        return {"id": mid, "nom": str(man["nom"])[:80], "version": version, "description": str(man["description"]).strip()[:500], "famille": section[:40], "section": section[:40],
                 "auteur": str(man.get("auteur", ""))[:80], "licence": str(man.get("licence", ""))[:40], "importance": man["importance"], "sans": str(man["sans"])[:300],
                 "noyau_min": str(man.get("noyau_min", ""))[:20], "requiert": requiert, "icone_trace": str(man.get("icone_trace", ""))[:800],
                 "taille": len(octets), "sha256": hashlib.sha256(octets).hexdigest(), "editeur": editeur,
