@@ -1,0 +1,9 @@
+# Les révocations du registre officiel : un module (ou des versions de ce module) retiré parce qu'il est dangereux ou défectueux.
+# Chaque installation de Cassandra lit cette liste (elle est dans l'index SIGNÉ) : elle refuse d'installer ce qui est révoqué et signale ce qui l'est déjà, sur la page App Store.
+#
+# [[revocation]]
+# id = "mon_module"
+# versions = "<1.2"          # vide ou absent : toutes les versions
+# raison = "Lit des fichiers hors de son espace (CVE-AAAA-NNNN). Mettre à jour vers 1.2 ou retirer."
+#
+# La raison est obligatoire : on doit pouvoir dire POURQUOI, publiquement.

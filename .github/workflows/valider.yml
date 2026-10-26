@@ -1,0 +1,17 @@
+name: Valider le registre
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  valider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Contrôler les archives, les éditeurs, les révocations et l'index publié
+        run: python outils/registre.py verifier
+      - name: Tester l'outil
+        run: python -m unittest discover -s tests -v

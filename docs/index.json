@@ -1,0 +1,27 @@
+{
+ "editeurs": [],
+ "emis": 1792996359,
+ "expire": 1798180359,
+ "format": 1,
+ "modules": [
+  {
+   "auteur": "",
+   "description": "Mesure l'occupation du disque racine et ouvre un constat au-delà du seuil. Exemple de greffe à chaud : un moteur, un détecteur, un type d'objet, des événements.",
+   "editeur": "cassandra",
+   "famille": "supervision",
+   "icone_trace": "",
+   "id": "sentinelle",
+   "importance": "optionnel",
+   "licence": "",
+   "nom": "Sentinelle du disque",
+   "noyau_min": "0.1.0",
+   "requiert": [],
+   "sans": "Plus de mesure du disque racine ni de constat quand il se remplit.",
+   "sha256": "23d7eaffa2e0cd6ad861e8343ea285bb0b0ac6f99e52d400b3c5c6b100b689ef",
+   "taille": 2660,
+   "url": "modules/sentinelle/sentinelle-0.1.2.cmod",
+   "version": "0.1.2"
+  }
+ ],
+ "revocations": []
+}

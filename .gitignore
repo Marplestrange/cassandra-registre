@@ -1,0 +1,6 @@
+# Les clés PRIVÉES ne vivent jamais ici
+*.pem
+*.key
+*.p12
+__pycache__/
+*.pyc

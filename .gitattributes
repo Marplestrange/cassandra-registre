@@ -1,0 +1,5 @@
+# Les fichiers signés ne doivent JAMAIS voir leurs fins de ligne converties : un octet de plus et la signature ne correspond plus.
+docs/** -text
+*.cmod binary
+*.sig -text
+*.pub -text
