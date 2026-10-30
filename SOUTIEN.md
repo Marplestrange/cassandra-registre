@@ -1,5 +1,7 @@
 # Soutenir le projet
 
+<p align="center"><img src="docs/assets/logo-maison-boheme.png" alt="Logo de La Maison Bohème" width="140"></p>
+
 Cassandra et son registre sont portés par **La Maison Bohème**, association loi 1901 (SIREN 899 553 093, RNA W751260323), qui accepte les dons.
 Les dons ouvrent droit à une réduction d'impôt de 66 % de leur montant, dans les limites fixées par la loi.
 

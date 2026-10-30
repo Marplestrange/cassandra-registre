@@ -220,9 +220,12 @@ class FraicheurEtVitrine(Base, unittest.TestCase):
         accueil = (self.d / "docs" / "index.html").read_text(encoding="utf-8")
         self.assertIn('id="q"', accueil)
         self.assertIn('href="modules/essai/"', accueil)
+        self.assertIn("assets/logo-maison-boheme.png", accueil)                 # le pied dit qui porte le projet, avec son logo
+        self.assertIn("La Maison Bohème", accueil)
         page = (self.d / "docs" / "modules" / "essai" / "index.html").read_text(encoding="utf-8")
         self.assertIn("un service", page)
         self.assertIn("sha256sum", page)
+        self.assertIn("../../assets/logo-maison-boheme.png", page)
 
     def test_la_commande_vitrine_ne_touche_ni_a_l_index_ni_a_la_signature(self):
         T.archive(self.d, self.priv)

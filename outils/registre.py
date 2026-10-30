@@ -591,10 +591,18 @@ main{max-width:980px;margin:0 auto}h1{font-size:26px;margin:0 0 6px}h2{font-size
 .n.beta,.n.prog{color:var(--warn);border-color:var(--warn)}.n.rev{color:var(--bad);border-color:var(--bad)}
 .note{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;color:var(--soft);font-size:14px;margin:14px 0}
 table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}td,th{padding:7px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{width:32%;color:var(--soft);font-weight:600}
+.asso{display:flex;align-items:center;gap:14px;margin:26px 0 6px;color:var(--soft);font-size:14px}.asso img{width:84px;height:auto;flex:none}
 pre{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}.vide{display:none}"""
 
 NOTE_BAS = ('Index n° %d, émis le %s, valable jusqu\'au %s. Source et règles : <a href="https://github.com/Marplestrange/cassandra-registre">dépôt du registre</a>. '
             'Soutenir le projet : <a href="https://github.com/Marplestrange/cassandra-registre/blob/main/SOUTIEN.md">La Maison Bohème</a>.')
+
+
+def pied_asso(prefixe: str) -> str:
+    """Le pied de chaque page : qui porte le projet, avec son logo (docs/assets/logo-maison-boheme.png)."""
+    return ('<div class="asso"><img src="%sassets/logo-maison-boheme.png" alt="Logo de La Maison Bohème" width="84" height="84">'
+            '<span>Ce registre est porté par <b>La Maison Bohème</b>, association loi 1901 (SIREN 899 553 093) qui accepte les dons. '
+            '<a href="https://github.com/Marplestrange/cassandra-registre/blob/main/SOUTIEN.md">Soutenir le projet</a>.</span></div>' % prefixe)
 
 
 def _niveau(m: dict, eds: dict) -> tuple:
@@ -642,10 +650,11 @@ function f(){var t=q.value.toLowerCase().trim();c.forEach(function(e){var ok=(!t
 <div class="grille">@@CARTES@@</div>
 <div class="note"><b>Pour installer</b> : dans Cassandra, menu avatar › Logithèque › Boutique. Rien ne s'installe sans votre accord ; un module tourne <b>dans</b> Cassandra : lisez ce qu'il demande avant de consentir.<br>@@BAS@@</div>
 @@AVIS@@@@REV@@
+@@ASSO@@
 </main><script>@@JS@@</script></body></html>
 """.replace("@@STYLE@@", STYLE).replace("@@SECTIONS@@", sections).replace("@@CARTES@@", "".join(cartes) or '<p class="sous">Aucun module publié pour l\'instant.</p>') \
        .replace("@@BAS@@", NOTE_BAS % (brut.get("serie", 0), _date(brut["emis"]), _date(brut["expire"]))).replace("@@AVIS@@", bloc_avis) \
-       .replace("@@REV@@", ("<h2>Révocations</h2><ul>%s</ul>" % rev) if rev else "").replace("@@JS@@", js)
+       .replace("@@REV@@", ("<h2>Révocations</h2><ul>%s</ul>" % rev) if rev else "").replace("@@ASSO@@", pied_asso("")).replace("@@JS@@", js)
 
 
 def page_module(m: dict, brut: dict) -> str:
@@ -677,10 +686,11 @@ def page_module(m: dict, brut: dict) -> str:
 <table>@@LIGNES@@</table>@@ALERTES@@@@AVIS@@@@CHG@@
 <h2>Versions</h2><ul>@@VERSIONS@@</ul>
 <div class="note">Pour installer : dans Cassandra, menu avatar › Logithèque › Boutique. Vérifiez à la main : <code>sha256sum @@ID@@-@@VER@@.cmod</code> doit rendre l'empreinte ci-dessus.<br>@@BAS@@</div>
+@@ASSO@@
 </main></body></html>
 """.replace("@@STYLE@@", STYLE).replace("@@NOM@@", html.escape(m["nom"])).replace("@@DESC@@", html.escape(m["description"])).replace("@@LIGNES@@", "".join("<tr><th>%s</th><td>%s</td></tr>" % l for l in lignes)) \
        .replace("@@ALERTES@@", alertes).replace("@@AVIS@@", avis).replace("@@CHG@@", chg).replace("@@VERSIONS@@", versions).replace("@@ID@@", html.escape(m["id"])).replace("@@VER@@", html.escape(m["version"])) \
-       .replace("@@BAS@@", NOTE_BAS % (brut.get("serie", 0), _date(brut["emis"]), _date(brut["expire"])))
+       .replace("@@BAS@@", NOTE_BAS % (brut.get("serie", 0), _date(brut["emis"]), _date(brut["expire"]))).replace("@@ASSO@@", pied_asso("../../"))
 
 
 def ecrire_vitrine(brut: dict):

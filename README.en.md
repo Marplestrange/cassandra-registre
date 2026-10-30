@@ -68,7 +68,9 @@ Rules at a glance: a third-party module is named `<publisher>_name`; it declares
 
 ## Who carries the project
 
-Cassandra is carried by **La Maison Bohème**, a French non-profit association (loi 1901), which accepts donations ([SOUTIEN.md](SOUTIEN.md)). The code is free software (AGPL-3.0): the best way to help is to write or review a module.
+<p align="center"><img src="docs/assets/logo-maison-boheme.png" alt="La Maison Bohème logo" width="140"></p>
+
+Cassandra is carried by **La Maison Bohème**, a French non-profit association (loi 1901, SIREN 899 553 093), which accepts donations ([SOUTIEN.md](SOUTIEN.md)). The code is free software (AGPL-3.0): the best way to help is to write or review a module.
 
 ---
 

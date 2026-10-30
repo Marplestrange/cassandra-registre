@@ -66,7 +66,9 @@ Si la clé principale doit être remplacée, la procédure est dans [ROTATION.md
 
 ## Qui porte ce projet
 
-Cassandra est portée par **La Maison Bohème**, association loi 1901, qui accepte les dons ([SOUTIEN.md](SOUTIEN.md)). Le code est libre (AGPL-3.0) : le meilleur soutien reste d'écrire ou de relire un module.
+<p align="center"><img src="docs/assets/logo-maison-boheme.png" alt="Logo de La Maison Bohème" width="140"></p>
+
+Cassandra est portée par **La Maison Bohème**, association loi 1901 (SIREN 899 553 093), qui accepte les dons ([SOUTIEN.md](SOUTIEN.md)). Le code est libre (AGPL-3.0) : le meilleur soutien reste d'écrire ou de relire un module.
 
 ---
 
