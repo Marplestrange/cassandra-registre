@@ -1,66 +1,89 @@
 # Registre officiel de Cassandra
 
-*English summary below.*
+**La boutique de modules de [Cassandra](https://github.com/Marplestrange), où chaque module est signé et vérifiable.**
 
-Le magasin de modules de [Cassandra](https://github.com/Marplestrange) : ce dépôt est la **source de vérité**. Ce qu'il contient, signé, est ce que la Logithèque de Cassandra propose.
-La vitrine publique (recherche, filtres, une fiche par module avec ses permissions et son empreinte) est servie par GitHub Pages depuis `docs/`.
+🔎 **Voir les modules : https://marplestrange.github.io/cassandra-registre/** (recherche, filtres, une fiche par module)
 
-- **Installer un module** : dans Cassandra, menu avatar › Logithèque › Boutique.
-- **Publier un module** : [CONTRIBUER.md](CONTRIBUER.md). Devenir éditeur vérifié : [editeurs/LISEZ-MOI.md](editeurs/LISEZ-MOI.md). Modèle de module prêt à copier : `cassandra-module-modele`.
-- **Comprendre la confiance** : [GOUVERNANCE.md](GOUVERNANCE.md) et [SECURITE.md](SECURITE.md).
-- **Soutenir le projet** : [SOUTIEN.md](SOUTIEN.md).
+*English summary at the bottom.*
 
-## Comment ça tient
+---
+
+## En une phrase
+
+Cassandra est une IA qui administre vos serveurs et votre travail. Pour lui ajouter des capacités (un thème, un pont vers un logiciel, un métier), on installe des **modules**. Ce dépôt est la liste officielle de ces modules, et la preuve que chacun vient bien de qui il dit venir.
+
+## Pourquoi ça existe
+
+Un module **tourne dans Cassandra, avec ses droits**. Installer un module, c'est donc faire confiance à son auteur. Avant d'installer, vous devez pouvoir répondre à trois questions :
+
+1. **Qui l'a écrit ?** Chaque module est signé : par l'équipe de Cassandra (« Officiel ») ou par un éditeur dont l'identité a été vérifiée (« Éditeur vérifié »).
+2. **Est-ce bien le code d'origine ?** Une archive modifiée après sa signature est refusée. Le code d'un module d'éditeur doit en plus correspondre à son dépôt public : vous pouvez le relire tel qu'il est publié.
+3. **Que demande-t-il ?** Chaque fiche liste ce que le module annonce faire (parler au réseau, lancer des processus…). Un module qui fait plus que ce qu'il annonce est refusé.
+
+Et si un module se révèle dangereux, il est **révoqué** : toutes les installations de Cassandra le savent et refusent de l'installer.
+
+## Installer un module
+
+Dans Cassandra : menu de l'avatar › **Logithèque** › **Boutique**. Rien ne s'installe sans votre accord, et Cassandra vous montre ce que le module demande avant.
+
+## Ce qui protège (sans jargon)
+
+| Risque | Ce qui l'empêche |
+|---|---|
+| Un faux module qui se fait passer pour un autre | chaque archive est **signée** ; un éditeur ne publie que sous son propre nom (`<éditeur>_module`) |
+| Un module modifié en route | l'**empreinte** de chaque fichier est contrôlée à l'installation |
+| Un site pirate qui sert un faux catalogue | la **liste elle-même est signée** ; Cassandra connaît la clé et refuse tout le reste |
+| Un vieux catalogue rejoué pour cacher un module retiré | chaque liste a un **numéro qui ne recule jamais** ; Cassandra refuse un numéro plus ancien |
+| Un registre abandonné qu'on croirait encore à jour | la liste **expire**, et une preuve de fraîcheur est renouvelée chaque jour |
+| Un module qui en fait plus qu'annoncé | le code est **analysé** contre ses permissions déclarées avant publication |
+| Une panne de l'hébergeur | des **miroirs** peuvent servir la même liste (tout est signé, ils n'ont pas besoin d'être sûrs) |
+
+Ce que le registre **ne garantit pas** : un module installé tourne avec les droits de Cassandra. La signature dit *qui* a publié, la relecture dit *ce que fait le code*. Le détail est dans [SECURITE.md](SECURITE.md).
+
+## Publier un module
+
+1. Copiez le **[modèle de module](https://github.com/Marplestrange/cassandra-module-modele)** et écrivez votre module.
+2. Signez-le avec votre clé d'éditeur.
+3. Ouvrez une *pull request* ici : [CONTRIBUER.md](CONTRIBUER.md) explique chaque étape.
+4. Pour devenir **éditeur vérifié** : [editeurs/LISEZ-MOI.md](editeurs/LISEZ-MOI.md).
+
+## Qui porte ce projet
+
+Cassandra est portée par **La Maison Bohème**, association loi 1901, qui accepte les dons ([SOUTIEN.md](SOUTIEN.md)). Le code est libre (AGPL-3.0) : le meilleur soutien reste d'écrire ou de relire un module.
+
+---
+
+## Pour les mainteneurs
+
 ```
-cles/               les clés PUBLIQUES racine (principale et secours) : la racine de confiance, la même que celle embarquée dans l'application
-fraicheur/          la clé PUBLIQUE de fraîcheur : elle atteste chaque jour que l'index est toujours le courant (jamais une racine)
-editeurs/           les éditeurs dont l'identité est vérifiée (leur clé publique, sa date d'expiration)
-revocations.toml    ce qui est retiré, et pourquoi (une révocation EMPÊCHE d'installer)
-avis/               les avis de sécurité, lisibles par une machine (un avis INFORME : gravité, versions touchées, correctif)
-canaux.toml         la bêta et le déploiement progressif (quelle version, à quel pourcentage des installations)
-provenance/         d'où vient le code de chaque archive d'éditeur (dépôt public et commit) : on peut le relire tel qu'il est publié
-journal.jsonl       le journal des publications : append-only, chaîné par empreintes
-docs/               ce qui est PUBLIÉ (servi tel quel) : index.json, index.json.sig, fraicheur.json, la vitrine, modules/<id>/<id>-<version>.cmod
-outils/registre.py     contrôle le dépôt et publie l'index signé (hors ligne, avec la clé racine)
-outils/fraicheur.py    la clé de fraîcheur : signer chaque jour que l'index est à jour
-tests/              les bancs de l'outil
+python outils/registre.py verifier      archives, code, éditeurs, révocations, avis, journal, index, fraîcheur ; code 1 au moindre défaut
+python outils/registre.py provenance    chaque archive qui déclare sa source est reconstituée depuis elle, fichier par fichier
+python outils/registre.py publier --cle racine.pem --jours 180   signe l'index (série suivante), écrit docs/ et le journal
+python outils/registre.py vitrine       réécrit la vitrine depuis l'index publié (ne signe rien)
+python outils/fraicheur.py renouveler --cle fraicheur.pem        signe et publie la fraîcheur (tâche planifiée, chaque jour)
 ```
 
-Un module est une archive `.cmod` **signée** (par la racine, ou par un éditeur vérifié). L'index qui les liste est lui-même signé par la racine : une copie modifiée, un
-hébergeur piraté, un index rejoué plus tard (la **série** ne revient jamais en arrière) ou un module révoqué qu'on voudrait cacher sont refusés par l'application.
-
-## Contrôler et publier
 ```
-python outils/registre.py verifier                         archives, analyse du code, éditeurs, révocations, avis, journal, index, fraîcheur ; code 1 au moindre défaut
-python outils/registre.py provenance                       chaque archive qui déclare sa source est reconstituée depuis elle, fichier par fichier
-python outils/registre.py publier --cle /chemin/hors/depot/racine-principale.pem
-python outils/registre.py vitrine                          réécrit la vitrine depuis l'index déjà publié (ne signe rien)
+cles/            les clés PUBLIQUES racine (principale et secours), les mêmes que celles embarquées dans l'application
+fraicheur/       la clé PUBLIQUE de fraîcheur (jamais une racine)
+editeurs/        les éditeurs vérifiés (clé publique, date d'expiration)
+revocations.toml ce qui est retiré, et pourquoi (une révocation EMPÊCHE d'installer)
+avis/            les avis de sécurité lisibles par une machine (un avis INFORME)
+canaux.toml      la bêta et le déploiement progressif
+provenance/      d'où vient le code de chaque archive d'éditeur
+journal.jsonl    le journal des publications : append-only, chaîné par empreintes
+docs/            ce qui est publié (GitHub Pages) : index.json, sa signature, la fraîcheur, la vitrine, les archives
+outils/ tests/   l'outil de contrôle et de publication, ses bancs
 ```
-`publier` contrôle tout, signe l'index (série suivante), écrit `docs/` (l'index, la vitrine, une page par module) et ajoute une ligne au journal.
-La clé racine ne vit **jamais** dans ce dépôt ni dans l'intégration continue.
 
-## Garder l'index frais sans ressortir la racine
-L'index a une date d'expiration : un registre qu'on ne tient plus à jour cesse d'être cru. Pour ne pas ressortir la clé racine toutes les quelques semaines, une seconde clé,
-à faible pouvoir, signe chaque jour `docs/fraicheur.json` (« l'index n° N est toujours le courant »). Si elle fuit, on peut seulement prolonger la fraîcheur d'un index
-déjà signé par la racine. Mise en place : `python outils/fraicheur.py init DOSSIER`, republier l'index avec la racine, puis mettre la clé privée dans le secret
-`FRAICHEUR_CLE_PRIVEE` et la variable `FRAICHEUR_ACTIVE=oui` du dépôt : `.github/workflows/fraicheur.yml` s'en charge.
-
-## Publication web
-GitHub Pages sert `docs/` : Settings › Pages › Source « Deploy from a branch », branche `main`, dossier `/docs`. L'application connaît l'adresse de l'index et, en secours, celles de ses
-miroirs : en changer demande une mise à jour de l'application. Un miroir est une copie byte-à-byte de `docs/` sur un autre hébergeur : il n'a pas besoin d'être de confiance, puisque tout est signé.
-
-Licence : AGPL-3.0 (voir `LICENSE`). Le projet est porté par **La Maison Bohème**, association loi 1901.
+La clé racine est **hors ligne** et ne vit jamais dans ce dépôt ni dans l'intégration continue. La clé de fraîcheur, à faible pouvoir, signe chaque jour « l'index est toujours le courant » : si elle fuit, on peut seulement prolonger la validité d'un index déjà signé. Le modèle de confiance complet est dans [GOUVERNANCE.md](GOUVERNANCE.md).
 
 ---
 
 ## English summary
 
-The official module registry of **Cassandra**, an auto-hosted AI system administrator. This repository is the source of truth for what Cassandra's module store (the *Logithèque*) offers.
+**The official module registry of Cassandra**, an auto-hosted AI system administrator. Every module is a signed archive; the catalogue itself is signed, carries a never-decreasing series number (replay protection) and is kept fresh by a low-privilege key, so the offline root key stays offline.
 
-- Modules ship as signed `.cmod` archives (Ed25519). The **index is signed** by an offline root key; a **freshness key** with low privilege re-attests daily that the index is current, so the root key never has to come out just to renew it.
-- The index carries a monotonically increasing **series number**: a replayed older index is refused. Every publication is appended to a hash-chained, append-only **journal**.
-- Third-party publishers must be **verified**, namespace their modules (`<publisher>_name`), declare their **provenance** (public repository + commit, checked by CI by rebuilding), and pass a static **analysis** of their code against their declared permissions.
-- **Revocations** block installation; machine-readable **security advisories** inform; **channels** (stable/beta) and **staged rollout** (`pourcent`) are supported.
-- See [CONTRIBUER.md](CONTRIBUER.md) to publish, [GOUVERNANCE.md](GOUVERNANCE.md) for the trust model, [SECURITE.md](SECURITE.md) for what is and is not guaranteed.
+Third-party publishers are identity-verified, namespace their modules (`<publisher>_name`), declare their source (checked by CI by rebuilding it) and pass a static analysis of their code against their declared permissions. Revocations block installation; machine-readable advisories inform; channels and staged rollout are supported.
 
-License: AGPL-3.0. The project is carried by *La Maison Bohème*, a French non-profit association (loi 1901).
+Browse: https://marplestrange.github.io/cassandra-registre/ · Publish: [CONTRIBUER.md](CONTRIBUER.md) · Trust model: [GOUVERNANCE.md](GOUVERNANCE.md) · License: AGPL-3.0, carried by *La Maison Bohème* (French non-profit, loi 1901).
