@@ -8,7 +8,7 @@ L'équipe de Cassandra décide de ce qui est publié. Elle seule détient les cl
 |---|---|---|---|
 | **racine-principale** | hors ligne, sauvegardée chiffrée en deux endroits | signer l'index et les modules officiels | la **secours** signe un index qui l'annonce ; une mise à jour de l'application embarque la nouvelle racine |
 | **racine-secours** | hors ligne, gardée à part, déjà embarquée dans l'application | remplacer la principale | idem, en sens inverse |
-| **fraîcheur** | dans l'intégration continue (secret du dépôt) | signer chaque jour « l'index n° N est toujours le courant » | on peut prolonger la fraîcheur d'un index déjà signé : **jamais** publier, retirer ou masquer quoi que ce soit ; on la remplace en republiant l'index avec une nouvelle clé de fraîcheur |
+| **fraîcheur** | sur deux serveurs du mainteneur (principal et secours) et sur son poste, jamais dans un dépôt | signer chaque jour « l'index n° N est toujours le courant » | on peut prolonger la fraîcheur d'un index déjà signé : **jamais** publier, retirer ou masquer quoi que ce soit ; on la remplace en republiant l'index avec une nouvelle clé de fraîcheur |
 
 Les deux clés racine sont embarquées dans l'application (`noyau/CN_registre_officiel.py`) et reprises dans `cles/`. La clé de fraîcheur est publiée dans `fraicheur/` **et inscrite dans l'index signé par la racine** : l'application ne croit une clé de fraîcheur que parce que la racine l'a nommée.
 
@@ -29,9 +29,19 @@ Les deux clés racine sont embarquées dans l'application (`noyau/CN_registre_of
 La procédure détaillée, étape par étape, est dans [ROTATION.md](ROTATION.md) : l'application ne croit une nouvelle clé principale que si elle est annoncée par la clé de **secours**, et il faut ensuite resigner les modules officiels.
 
 1. Perte ou fuite de la clé principale : la **secours** signe un index qui le dit ; une mise à jour de l'application embarque la nouvelle racine ; l'ancienne est retirée.
-2. Fuite de la clé de fraîcheur : en générer une autre (`outils/fraicheur.py init`), republier l'index avec la racine, changer le secret.
+2. Fuite de la clé de fraîcheur : en générer une autre (`outils/fraicheur.py init`), republier l'index avec la racine, remplacer la clé sur chaque machine de renouvellement (et révoquer leurs clés de dépôt dans *Settings › Deploy keys*).
 3. Un éditeur compromis : sa clé quitte `editeurs/`, ses modules entrent dans `revocations.toml` avec la raison, un avis est publié dans `avis/`.
 4. L'index expire : avec la clé de fraîcheur, c'est automatique ; sans elle, le renouveler est une tâche récurrente (`outils/renouveler.py`).
+
+## Qui renouvelle la fraîcheur
+
+| Machine | Rôle | Quand | Renouvelle si la fraîcheur a plus de |
+|---|---|---|---|
+| serveur principal | principal | deux fois par jour (cron) | 10 h |
+| serveur de secours | secours | toutes les 6 h (conteneur) | 20 h |
+| poste du mainteneur | dernier recours | tâche planifiée quotidienne | toujours |
+
+Chaque machine a sa propre clé de dépôt, limitée à ce dépôt. La commande est `python outils/fraicheur.py renouveler --cle CLE --si-plus-vieille-que HEURES`. Une surveillance GitHub (`surveillance.yml`) vérifie chaque jour le registre publié et ouvre un ticket si la fraîcheur a plus de 36 h. Le job `fraicheur.yml` reste disponible (variable `FRAICHEUR_ACTIVE`), désactivé tant qu'aucun secret GitHub ne porte la clé.
 
 ## Miroirs
 Une copie de `docs/` sur un autre hébergeur sert de secours si le premier tombe. Elle n'a pas besoin d'être de confiance : tout ce qu'elle sert est signé, et la série empêche qu'elle serve un index ancien. Les adresses des miroirs sont connues de l'application, comme l'adresse principale.
