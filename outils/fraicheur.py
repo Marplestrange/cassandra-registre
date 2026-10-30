@@ -76,9 +76,24 @@ def git(*args):
     return r.stdout.strip()
 
 
+def fraicheur_recente(heures, maintenant=None):
+    """Vrai si la fraîcheur publiée date de moins de `heures` heures (sert à plusieurs machines de renouvellement : la 2e ne refait rien si la 1re a déjà signé)."""
+    if not heures:
+        return False
+    f = R.RACINE / "docs" / "fraicheur.json"
+    try:
+        emis = int(json.loads(f.read_text(encoding="utf-8"))["emis"])
+    except (OSError, ValueError, KeyError):
+        return False
+    return ((maintenant if maintenant is not None else time.time()) - emis) < heures * 3600
+
+
 def cmd_renouveler(a):
     """Pour une tâche planifiée : à jour, signe la fraîcheur, la publie. Ne touche à rien d'autre (jamais l'index, jamais la racine) et refuse de pousser s'il y a autre chose de modifié."""
     git("pull", "--ff-only", "--quiet")
+    if fraicheur_recente(getattr(a, "si_plus_vieille_que", 0)):
+        print("fraîcheur récente (moins de %s h) : rien à faire" % a.si_plus_vieille_que)
+        return
     autre = [l for l in git("status", "--porcelain").splitlines() if "fraicheur.json" not in l]
     if autre:
         raise R.Defaut("le dépôt a d'autres changements non commités (%s) : on ne pousse pas la fraîcheur par-dessus" % "; ".join(autre[:3]))
@@ -109,6 +124,7 @@ def main(argv=None) -> int:
     sp.add_parser("verifier").set_defaults(f=cmd_verifier)
     r = sp.add_parser("renouveler")
     r.add_argument("--cle", required=True)
+    r.add_argument("--si-plus-vieille-que", type=float, default=0, metavar="HEURES", help="ne renouvelle que si la fraîcheur publiée a plus de HEURES heures (machine de secours)")
     r.set_defaults(f=cmd_renouveler)
     a = p.parse_args(argv)
     try:
