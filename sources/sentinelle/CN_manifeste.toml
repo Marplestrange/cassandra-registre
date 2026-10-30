@@ -1,0 +1,96 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# TITRE      : Manifeste du module Sentinelle du disque
+# LICENCE    : AGPL-3.0
+# AUTEUR     : Atek Drisse
+# GIT        : github.com/Marplestrange
+# MAIL       : marplestrange@cassandra.center
+# MODULE     : exemples
+# ZONE       : CN
+# VERSION CN : 0.1.0  #216787
+# VERSION EC : néant
+# EC LIÉES   : néant
+# RÔLE       : Mesure l'occupation du disque racine et ouvre un constat au-delà du seuil. Exemple de greffe à chaud : un moteur, un détecteur, un type d'objet, des événements.
+# MÉTHODE    : à compléter par l'auteur (comment le fichier s'y prend)
+# ══════════════════════════════════════════════════════════════════════════════
+# ▼▼▼ BORNE CN version=0.1.0 empreinte=216787 ▼▼▼
+[module]
+id = "sentinelle"
+nom = "Sentinelle du disque"
+version = "0.1.2"
+noyau_min = "0.1.0"
+description = "Mesure l'occupation du disque racine et ouvre un constat au-delà du seuil. Exemple de greffe à chaud : un moteur, un détecteur, un type d'objet, des événements."
+confiance = "local"
+famille = "supervision"
+importance = "optionnel"
+sans = "Plus de mesure du disque racine ni de constat quand il se remplit."
+
+[[objets]]
+type = "disque"
+libelle = "Un volume surveillé"
+
+[evenements]
+emet = ["disque.mesure"]
+
+[[moteurs]]
+id = "mesurer"
+libelle = "Mesure l'occupation du disque racine"
+mode = "periodique"
+toutes_les_s = 20
+
+[[detecteurs]]
+id = "disque_plein"
+libelle = "Disque occupé à plus de 90 %"
+frequence_s = 30
+
+[[capacites]]
+id = "lire_mesure"
+libelle = "Lire la dernière mesure d'occupation du disque racine"
+risque = "lecture"
+
+[theme]
+accent = "#a85a0b"
+
+[[ecrans]]
+id = "vue_disque"
+libelle = "Disque"
+domaine = "supervision"
+gabarit = "tableau"
+
+[[widgets]]
+id = "occupation"
+libelle = "Occupation du disque"
+ecran = "accueil"
+zone = "principal"
+taille = "s"
+ordre = 10
+composant = "jauge"
+source = "lire_mesure"
+rafraichir_s = 20
+
+[[widgets]]
+id = "detail"
+libelle = "Détail de la mesure"
+ecran = "vue_disque"
+composant = "liste"
+source = "lire_mesure"
+rafraichir_s = 20
+
+[[menus]]
+id = "disque"
+libelle = "Disque"
+ecran = "vue_disque"
+ordre = 10
+role = "admin"
+icone = "hard-drive"
+badge = "constats"
+
+[installation]
+script = "CN_installer.sh"
+verification = "CN_verifier.sh"
+retrait = "CN_retirer.sh"
+# ▲▲▲ FIN BORNE CN ▲▲▲
+
+# ═══ EXPLICATIF CN / EC ═══════════════════════════════════════════════════════
+# CN : tout ce fichier est du nexus : à compléter
+# EC : néant (aucun point d'évolution déclaré pour l'instant)
+# LIEN : à compléter (contrat, fichiers voisins)
