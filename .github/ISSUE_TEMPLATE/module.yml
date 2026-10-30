@@ -1,0 +1,17 @@
+name: Un module, un éditeur ou une question
+description: Proposer un module, devenir éditeur vérifié, ou poser une question sur le registre
+body:
+  - type: dropdown
+    id: sujet
+    attributes:
+      label: De quoi s'agit-il ?
+      options: ["Proposer un module", "Devenir éditeur vérifié", "Un problème avec la vitrine ou l'index", "Une question"]
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: Dites-nous tout
+      description: Le module (nom, dépôt public), ce qu'il fait, ce qu'il demande ; ou la page / la commande qui pose problème.
+    validations:
+      required: true

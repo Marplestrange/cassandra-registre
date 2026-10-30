@@ -40,6 +40,23 @@ In Cassandra: avatar menu › **Logithèque** (the app store) › **Boutique**. 
 
 What the registry does **not** guarantee: an installed module runs with Cassandra's rights. The signature says *who* published; only a review says *what the code does*. See [SECURITE.md](SECURITE.md) (French) for details.
 
+## Verify it yourself
+
+Do not take our word for it: a short script that needs only Python and openssl, and does not use our tools, verifies the published registry.
+
+```
+python outils/verifier_independant.py --module billetterie
+```
+
+It hard-codes the two root keys. Compare their **fingerprints** (SHA-256 of the public key) to the ones below and to those announced elsewhere (website, public posts): if they match, you are verifying against Cassandra's key, whatever was put in this repository.
+
+| Key | SHA-256 fingerprint |
+|---|---|
+| **primary** root | `b8480dd60c5fb3c58a78b96c1adb3e9ecf2f82dc9deae60ed174fbbfa8e5e40b` |
+| **backup** root | `d40407cfa327559acd7fbd6d867690417cfd77e36efe423ba99ce04c8181d4ae` |
+
+If the primary key ever has to be replaced, see [ROTATION.md](ROTATION.md) (French): only the backup key can announce it.
+
 ## Publishing a module
 
 1. Copy the **[module template](https://github.com/Marplestrange/cassandra-module-modele)** and write your module.

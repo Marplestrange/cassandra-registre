@@ -206,20 +206,22 @@ def analyser(mod: Path, perm: dict) -> tuple:
         except (SyntaxError, UnicodeDecodeError, ValueError) as ex:
             erreurs.append("%s : illisible comme du Python (%s)" % (rel, str(ex)[:60]))
             continue
-        importes, appels = set(), []
+        importes, nus, attrs = set(), set(), set()
         for n in ast.walk(arbre):
             if isinstance(n, ast.Import):
                 importes.update(a.name.split(".")[0] for a in n.names)
             elif isinstance(n, ast.ImportFrom) and n.module and n.level == 0:
                 importes.add(n.module.split(".")[0])
             elif isinstance(n, ast.Call):
-                nom = n.func.id if isinstance(n.func, ast.Name) else (n.func.attr if isinstance(n.func, ast.Attribute) else "")
-                appels.append((nom, getattr(n.func, "value", None)))
-        noms = {a for a, _ in appels}
+                if isinstance(n.func, ast.Name):
+                    nus.add(n.func.id)                                    # eval(...), exec(...), compile(...) : le code dynamique est un appel NU (re.compile n'en est pas un)
+                elif isinstance(n.func, ast.Attribute):
+                    attrs.add(n.func.attr)                                # os.system(...), os.popen(...)
+        noms = nus | attrs
         dang = importes & IMPORTS_DANGEREUX
         if dang:
             erreurs.append("%s : importe %s (hors de tout périmètre)" % (rel, ", ".join(sorted(dang))))
-        dyn = noms & APPELS_CODE_DYNAMIQUE
+        dyn = nus & APPELS_CODE_DYNAMIQUE
         if dyn and importes & IMPORTS_OBSCURCISSEMENT:
             erreurs.append("%s : code dynamique (%s) à côté d'un décodage (%s) : code masqué" % (rel, ", ".join(sorted(dyn)), ", ".join(sorted(importes & IMPORTS_OBSCURCISSEMENT))))
         elif dyn:
@@ -227,7 +229,7 @@ def analyser(mod: Path, perm: dict) -> tuple:
         res = importes & IMPORTS_RESEAU
         if res and not reseau_declare:
             erreurs.append("%s : parle au réseau (%s) sans l'avoir déclaré dans [permissions] reseau" % (rel, ", ".join(sorted(res))))
-        proc = ("subprocess" in importes) or bool(noms & APPELS_PROCESSUS)
+        proc = ("subprocess" in importes) or bool(attrs & APPELS_PROCESSUS) or bool(nus & APPELS_PROCESSUS)
         if proc and not processus_declare:
             erreurs.append("%s : lance des processus sans l'avoir déclaré dans [permissions] (racine ou privileges)" % rel)
     return erreurs, alertes
@@ -292,6 +294,27 @@ def serie_publiee() -> int:
         return int(json.loads(f.read_text(encoding="utf-8")).get("serie", 0))
     except (ValueError, TypeError):
         return 0
+
+
+def rotation_annoncee() -> dict:
+    """rotation.toml : l'annonce d'une nouvelle clé PRINCIPALE. Elle ne se publie qu'avec la clé de SECOURS (les installations n'y croient qu'à cette condition)."""
+    f = RACINE / "rotation.toml"
+    if not f.is_file():
+        return {}
+    try:
+        d = tomllib.loads(f.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as ex:
+        raise Defaut("rotation.toml : TOML illisible (%s)" % ex)
+    pem = str(d.get("nouvelle_cle", "")).replace("\r", "")
+    if not _PEM.match(pem):
+        raise Defaut("rotation.toml : « nouvelle_cle » doit être une clé publique PEM")
+    with tempfile.TemporaryDirectory() as t:
+        (Path(t) / "k").write_text(pem, encoding="utf-8")
+        if openssl("pkey", "-pubin", "-in", str(Path(t) / "k"), "-noout").returncode != 0:
+            raise Defaut("rotation.toml : la clé n'est pas une clé publique valide")
+    if not str(d.get("raison", "")).strip():
+        raise Defaut("rotation.toml : la raison est obligatoire (elle est publique)")
+    return {"nom": "principale", "retire": ["principale"], "cle": pem, "raison": str(d["raison"]).strip()[:300]}
 
 
 def cle_fraicheur() -> str:
@@ -702,7 +725,7 @@ def cmd_provenance(a):
             t = Path(t)
             mod, somm, _sig = extraire(arch, t / "a")
             src = t / "src"
-            for cmd in (["git", "init", "-q", str(src)], ["git", "-C", str(src), "fetch", "-q", "--depth", "1", prov["depot"], prov["commit"]], ["git", "-C", str(src), "checkout", "-q", "FETCH_HEAD"]):
+            for cmd in (["git", "init", "-q", str(src)], ["git", "-C", str(src), "config", "core.autocrlf", "false"], ["git", "-C", str(src), "fetch", "-q", "--depth", "1", prov["depot"], prov["commit"]], ["git", "-C", str(src), "checkout", "-q", "FETCH_HEAD"]):
                 r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                 if r.returncode:
                     raise Defaut("%s : impossible de récupérer %s au commit %s (%s)" % (arch.name, prov["depot"], prov["commit"][:12], (r.stderr or r.stdout).strip()[:120]))
@@ -724,7 +747,7 @@ def cmd_provenance(a):
     print("provenance OK : %d archive(s) reconstituée(s) à l'identique depuis leur source" % len(resultats) if resultats else "aucune archive ne déclare de provenance")
 
 
-def construire_index(modules: list, eds: dict, rev: list, jours: int, maintenant: float | None = None, serie: int = 1, extra: dict | None = None, avs: list | None = None, fraicheur: str = "") -> bytes:
+def construire_index(modules: list, eds: dict, rev: list, jours: int, maintenant: float | None = None, serie: int = 1, extra: dict | None = None, avs: list | None = None, fraicheur: str = "", rotation: dict | None = None) -> bytes:
     now = int(time.time() if maintenant is None else maintenant)
     extra = extra or {}
     brut = {"format": FORMAT, "serie": serie, "emis": now, "expire": now + jours * 86400, "modules": modules,
@@ -732,6 +755,8 @@ def construire_index(modules: list, eds: dict, rev: list, jours: int, maintenant
             "revocations": rev, "avis": avs or [], "beta": extra.get("beta", []), "progressifs": extra.get("progressifs", [])}
     if fraicheur:
         brut["fraicheur"] = {"cle": fraicheur, "validite_s": VALIDITE_FRAICHEUR_S}
+    if rotation:
+        brut["rotation"] = rotation
     return (json.dumps(brut, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8")
 
 
@@ -745,7 +770,10 @@ def cmd_publier(a):
     avs = avis()
     serie_journal, _ = verifier_journal()
     serie = max(serie_publiee(), serie_journal) + 1                           # jamais en arrière : un index plus ancien est refusé par les installations
-    octets = construire_index(modules, eds, rev, a.jours, serie=serie, extra=extra, avs=avs, fraicheur=cle_fraicheur())
+    rotation = rotation_annoncee()
+    if rotation and nom != "racine-secours":
+        raise Defaut("une rotation de la clé principale s'annonce avec la clé de SECOURS (racine-secours.pem) : les installations n'y croient qu'à cette condition")
+    octets = construire_index(modules, eds, rev, a.jours, serie=serie, extra=extra, avs=avs, fraicheur=cle_fraicheur(), rotation=rotation)
     sig = signer(octets, cle)
     docs = RACINE / "docs"
     brut = json.loads(octets)

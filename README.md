@@ -40,6 +40,23 @@ Dans Cassandra : menu de l'avatar › **Logithèque** › **Boutique**. Rien ne 
 
 Ce que le registre **ne garantit pas** : un module installé tourne avec les droits de Cassandra. La signature dit *qui* a publié, la relecture dit *ce que fait le code*. Le détail est dans [SECURITE.md](SECURITE.md).
 
+## Vérifier par vous-même
+
+Ne nous croyez pas sur parole : un script de dix minutes de lecture, qui ne dépend que de Python et d'openssl et n'utilise pas nos outils, vérifie le registre publié.
+
+```
+python outils/verifier_independant.py --module billetterie
+```
+
+Il porte en dur les deux clés racine. Comparez leurs **empreintes** (SHA-256 de la clé publique) à celles-ci, et à celles que nous annonçons ailleurs (site, messages publics) : si elles concordent, vous vérifiez bien contre la clé de Cassandra, quoi qu'on ait mis dans ce dépôt.
+
+| Clé | Empreinte SHA-256 |
+|---|---|
+| racine **principale** | `b8480dd60c5fb3c58a78b96c1adb3e9ecf2f82dc9deae60ed174fbbfa8e5e40b` |
+| racine de **secours** | `d40407cfa327559acd7fbd6d867690417cfd77e36efe423ba99ce04c8181d4ae` |
+
+Si la clé principale doit être remplacée, la procédure est dans [ROTATION.md](ROTATION.md) : seule la clé de secours peut l'annoncer.
+
 ## Publier un module
 
 1. Copiez le **[modèle de module](https://github.com/Marplestrange/cassandra-module-modele)** et écrivez votre module.

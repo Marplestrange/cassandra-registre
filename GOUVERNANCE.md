@@ -26,6 +26,8 @@ Les deux clés racine sont embarquées dans l'application (`noyau/CN_registre_of
 - **Canaux et déploiement progressif** : une version peut être en bêta, ou proposée à une part seulement des installations, avant d'être offerte à tous.
 
 ## Rotation ou compromission
+La procédure détaillée, étape par étape, est dans [ROTATION.md](ROTATION.md) : l'application ne croit une nouvelle clé principale que si elle est annoncée par la clé de **secours**, et il faut ensuite resigner les modules officiels.
+
 1. Perte ou fuite de la clé principale : la **secours** signe un index qui le dit ; une mise à jour de l'application embarque la nouvelle racine ; l'ancienne est retirée.
 2. Fuite de la clé de fraîcheur : en générer une autre (`outils/fraicheur.py init`), republier l'index avec la racine, changer le secret.
 3. Un éditeur compromis : sa clé quitte `editeurs/`, ses modules entrent dans `revocations.toml` avec la raison, un avis est publié dans `avis/`.

@@ -1,0 +1,7 @@
+# Tout changement d'un module, d'une clé, d'une révocation ou de la gouvernance est relu par le mainteneur.
+*                       @Marplestrange
+/cles/                  @Marplestrange
+/editeurs/              @Marplestrange
+/docs/modules/          @Marplestrange
+/revocations.toml       @Marplestrange
+/rotation.toml          @Marplestrange

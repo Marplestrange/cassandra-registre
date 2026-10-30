@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Signaler une faille de sécurité / Report a vulnerability
+    url: https://github.com/Marplestrange/cassandra-registre/security/advisories/new
+    about: Ne la publiez pas dans un ticket : écrivez-nous en privé. / Please do not file it as a public issue.
