@@ -3,3 +3,6 @@ docs/** -text
 *.cmod binary
 *.sig -text
 *.pub -text
+
+# Les sources que le registre garde pour prouver la provenance sont conservées OCTET POUR OCTET (aucune conversion de fins de ligne).
+sources/** -text
