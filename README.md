@@ -4,7 +4,7 @@
 
 🔎 **Voir les modules : https://marplestrange.github.io/cassandra-registre/** (recherche, filtres, une fiche par module)
 
-*English summary at the bottom.*
+🇬🇧 **English version: [README.en.md](README.en.md)**
 
 ---
 
