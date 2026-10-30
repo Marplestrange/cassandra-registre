@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Les actions sont épinglées par empreinte de commit : Dependabot propose chaque mise à jour, le mainteneur la relit.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "Actions GitHub"

@@ -8,13 +8,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  issues: write
 jobs:
   fraicheur:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ vars.FRAICHEUR_ACTIVE == 'oui' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
       - name: Signer la fraîcheur
@@ -32,3 +33,13 @@ jobs:
           git add docs/fraicheur.json docs/fraicheur.json.sig
           git diff --cached --quiet || git commit -m "Fraîcheur de l'index renouvelée"
           git push
+      - name: Prévenir si la fraîcheur n'a pas pu être renouvelée
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Sans fraîcheur renouvelée, l'index expire et les installations de Cassandra le refusent : un ticket l'annonce (un seul à la fois).
+          if [ -z "$(gh issue list --state open --label fraicheur --json number --jq '.[0].number')" ]; then
+            gh label create fraicheur --color B60205 --description "La fraîcheur de l'index n'a pas pu être renouvelée" 2>/dev/null || true
+            gh issue create --label fraicheur --title "La fraîcheur de l'index n'a pas été renouvelée"               --body "Le renouvellement quotidien a échoué : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Voir GOUVERNANCE.md (panne de la clé de fraîcheur, secret FRAICHEUR_CLE_PRIVEE)."
+          fi

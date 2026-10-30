@@ -1,0 +1,43 @@
+name: Surveiller le registre publié
+
+# Chaque jour, après le renouvellement de la fraîcheur (05:17 UTC) : le registre PUBLIÉ (GitHub Pages) est-il vérifiable par le script indépendant,
+# et sa fraîcheur est-elle récente ? Si non, la tâche échoue et un ticket est ouvert (un seul à la fois).
+on:
+  schedule:
+    - cron: "43 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  surveiller:
+    name: Registre publié
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Vérification indépendante du registre publié (index, signatures, clés racine écrites dans le script)
+        run: python outils/verifier_independant.py
+      - name: La fraîcheur publiée date de moins de 36 heures
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+          d = json.load(urllib.request.urlopen("https://marplestrange.github.io/cassandra-registre/fraicheur.json", timeout=30))
+          age_h = (time.time() - d["emis"]) / 3600
+          print("fraîcheur émise il y a %.1f h, expire dans %.1f jours" % (age_h, (d["expire"] - time.time()) / 86400))
+          raise SystemExit(0 if age_h < 36 and d["expire"] > time.time() else 1)
+          PY
+      - name: Prévenir
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(gh issue list --state open --label surveillance --json number --jq '.[0].number')" ]; then
+            gh label create surveillance --color D93F0B --description "Le registre publié ne se vérifie plus" 2>/dev/null || true
+            gh issue create --label surveillance --title "Le registre publié ne passe plus la vérification indépendante"               --body "Voir : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi

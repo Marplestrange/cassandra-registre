@@ -1,6 +1,12 @@
 # Registre officiel de Cassandra
 
-**La boutique de modules de [Cassandra](https://github.com/Marplestrange), où chaque module est signé et vérifiable.**
+[![Valider le registre](https://github.com/Marplestrange/cassandra-registre/actions/workflows/valider.yml/badge.svg)](https://github.com/Marplestrange/cassandra-registre/actions/workflows/valider.yml)
+[![Surveillance](https://github.com/Marplestrange/cassandra-registre/actions/workflows/surveillance.yml/badge.svg)](https://github.com/Marplestrange/cassandra-registre/actions/workflows/surveillance.yml)
+![Série de l'index](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fmarplestrange.github.io%2Fcassandra-registre%2Findex.json&query=%24.serie&label=index%20s%C3%A9rie)
+![Modules](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fmarplestrange.github.io%2Fcassandra-registre%2Findex.json&query=%24.modules.length&label=modules)
+[![Licence AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
+
+**La boutique de modules de [Cassandra](https://github.com/Marplestrange/cassandra-v19), où chaque module est signé et vérifiable.**
 
 🔎 **Voir les modules : https://marplestrange.github.io/cassandra-registre/** (recherche, filtres, une fiche par module)
 
@@ -87,8 +93,8 @@ cles/            les clés PUBLIQUES racine (principale et secours), les mêmes 
 fraicheur/       la clé PUBLIQUE de fraîcheur (jamais une racine)
 editeurs/        les éditeurs vérifiés (clé publique, date d'expiration)
 revocations.toml ce qui est retiré, et pourquoi (une révocation EMPÊCHE d'installer)
-avis/            les avis de sécurité lisibles par une machine (un avis INFORME)
-canaux.toml      la bêta et le déploiement progressif
+avis/            les avis de sécurité lisibles par une machine (un avis INFORME) ; créé au premier avis
+canaux.toml      la bêta et le déploiement progressif ; créé à la première publication par canal
 provenance/      d'où vient le code de chaque archive d'éditeur
 journal.jsonl    le journal des publications : append-only, chaîné par empreintes
 docs/            ce qui est publié (GitHub Pages) : index.json, sa signature, la fraîcheur, la vitrine, les archives
