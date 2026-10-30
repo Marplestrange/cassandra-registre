@@ -2,9 +2,13 @@
  "avis": [],
  "beta": [],
  "editeurs": [],
- "emis": 1793381960,
- "expire": 1798565960,
+ "emis": 1793382313,
+ "expire": 1808934313,
  "format": 1,
+ "fraicheur": {
+  "cle": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAyKQsG+B2Sg/9mxGbsW2mfwLw0eDY2QKksO1NfVgvG7I=\n-----END PUBLIC KEY-----\n",
+  "validite_s": 1209600
+ },
  "modules": [
   {
    "alertes": [],
@@ -40,5 +44,5 @@
  ],
  "progressifs": [],
  "revocations": [],
- "serie": 1
+ "serie": 2
 }

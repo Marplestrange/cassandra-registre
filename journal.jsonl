@@ -1,1 +1,2 @@
 {"emis": 1793381960, "index_sha256": "ec41ba7fe7bac921a30797f4db6c86374ab9a7b08a4fcd67f69572946d993674", "ligne": "345360834d939ed71dcf36b48fdd9ad2e2e52a92eda25066d98aadff5bba66f8", "modules": {"sentinelle": "0.1.2:23d7eaffa2e0cd6a"}, "prec": "", "serie": 1}
+{"emis": 1793382313, "index_sha256": "673929e011b465f184aadba5398b648905095e639439e1074782e4eb76cc68f4", "ligne": "98ca5f247ccfbe4f860a6214df09bbe44b319927e90ac2e70134f43e7540df96", "modules": {"sentinelle": "0.1.2:23d7eaffa2e0cd6a"}, "prec": "345360834d939ed71dcf36b48fdd9ad2e2e52a92eda25066d98aadff5bba66f8", "serie": 2}

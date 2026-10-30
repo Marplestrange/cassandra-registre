@@ -38,7 +38,7 @@ _PEM = re.compile(r"^-----BEGIN PUBLIC KEY-----\n[A-Za-z0-9+/=\n]{40,200}-----EN
 IMPORTANCES = ("vital", "important", "optionnel")
 CANAUX = ("stable", "beta")
 GRAVITES = ("faible", "moyenne", "haute", "critique")
-VALIDITE_FRAICHEUR_S = 7 * 86400                                       # une fraîcheur signée vaut une semaine : au-delà, l'index n'est plus cru
+VALIDITE_FRAICHEUR_S = 14 * 86400                                      # une fraîcheur signée vaut deux semaines (une machine éteinte pendant des vacances ne bloque pas le registre) : au-delà, l'index n'est plus cru
 CHEMIN_FRAICHEUR = "fraicheur"                                         # dossier de la clé publique de fraîcheur (hors de cles/ : ce n'est PAS une racine)
 IMPORTS_RESEAU = {"socket", "ssl", "urllib", "http", "ftplib", "smtplib", "imaplib", "poplib", "telnetlib", "requests", "httpx", "aiohttp", "websockets", "xmlrpc", "websocket"}
 IMPORTS_DANGEREUX = {"ctypes", "pty"}                                  # jamais utiles à un module : ils sortent de tout périmètre

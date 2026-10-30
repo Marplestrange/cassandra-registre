@@ -7,8 +7,9 @@ chaque jour `docs/fraicheur.json` : « l'index n° N (empreinte X) est toujours 
 un voleur peut seulement RENOUVELER la fraîcheur d'un index que la racine a déjà signé, jamais publier ni retirer un module, ni masquer une révocation déjà publiée.
 
     python outils/fraicheur.py init DOSSIER                  fabrique la paire de clés : la publique va dans fraicheur/fraicheur.pub (à commiter), la privée reste dans DOSSIER
-    python outils/fraicheur.py signer --cle fraicheur.pem    écrit docs/fraicheur.json et docs/fraicheur.json.sig (valables 7 jours)
+    python outils/fraicheur.py signer --cle fraicheur.pem    écrit docs/fraicheur.json et docs/fraicheur.json.sig (valables 14 jours)
     python outils/fraicheur.py verifier                      contrôle ce qui est publié
+    python outils/fraicheur.py renouveler --cle fraicheur.pem   tire les dernières versions, signe, et pousse SEULEMENT si la fraîcheur a changé (pour une tâche planifiée)
 
 Ensuite : republier l'index avec la clé racine (`registre.py publier`) pour qu'il annonce la clé de fraîcheur, puis mettre la clé privée dans le secret
 FRAICHEUR_CLE_PRIVEE du dépôt GitHub : le travail `.github/workflows/fraicheur.yml` renouvelle la fraîcheur tous les jours.
@@ -68,6 +69,29 @@ def cmd_signer(a):
     print("fraîcheur signée pour l'index n° %d, valable jusqu'au %s" % (d["serie"], time.strftime("%d/%m/%Y %H:%M", time.gmtime(d["expire"]))))
 
 
+def git(*args):
+    r = subprocess.run(["git", *args], cwd=R.RACINE, capture_output=True, text=True)
+    if r.returncode:
+        raise R.Defaut("git %s : %s" % (" ".join(args), (r.stderr or r.stdout).strip()[:200]))
+    return r.stdout.strip()
+
+
+def cmd_renouveler(a):
+    """Pour une tâche planifiée : à jour, signe la fraîcheur, la publie. Ne touche à rien d'autre (jamais l'index, jamais la racine) et refuse de pousser s'il y a autre chose de modifié."""
+    git("pull", "--ff-only", "--quiet")
+    autre = [l for l in git("status", "--porcelain").splitlines() if "fraicheur.json" not in l]
+    if autre:
+        raise R.Defaut("le dépôt a d'autres changements non commités (%s) : on ne pousse pas la fraîcheur par-dessus" % "; ".join(autre[:3]))
+    cmd_signer(a)
+    git("add", "docs/fraicheur.json", "docs/fraicheur.json.sig")
+    if not git("status", "--porcelain", "--", "docs/fraicheur.json", "docs/fraicheur.json.sig"):
+        print("rien à publier")
+        return
+    git("commit", "--quiet", "-m", "Fraîcheur de l'index renouvelée")
+    git("push", "--quiet")
+    print("fraîcheur publiée")
+
+
 def cmd_verifier(_):
     R.verifier_fraicheur_publiee()
     print("OK")
@@ -83,6 +107,9 @@ def main(argv=None) -> int:
     s.add_argument("--cle", required=True)
     s.set_defaults(f=cmd_signer)
     sp.add_parser("verifier").set_defaults(f=cmd_verifier)
+    r = sp.add_parser("renouveler")
+    r.add_argument("--cle", required=True)
+    r.set_defaults(f=cmd_renouveler)
     a = p.parse_args(argv)
     try:
         a.f(a)
