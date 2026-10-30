@@ -1,7 +1,9 @@
-id = "mon_organisation"          # le nom de ce fichier, sans .toml : minuscules, chiffres, _
+id = "mon_organisation"          # le nom de ce fichier, sans .toml : minuscules, chiffres, _ ; c'est aussi le préfixe de tous tes modules
 nom = "Mon Organisation"
 site = "https://exemple.org"
+contact = "securite@exemple.org" # à qui écrire en cas de faille dans l'un de tes modules
 verifie = false                  # l'équipe de Cassandra le passe à true après avoir vérifié ton identité
+expire = "2028-12-31"            # AAAA-MM-JJ : fin de vie de la clé (fixée par l'équipe, au plus deux ans)
 cle = """-----BEGIN PUBLIC KEY-----
 (colle ici le contenu de editeur.pub : la clé PUBLIQUE, jamais la privée)
 -----END PUBLIC KEY-----

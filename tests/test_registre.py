@@ -62,7 +62,9 @@ def archive(dest: Path, priv: Path, mid="essai", version="1.0.0", plus="", nom_f
     return cible
 
 
-class Depot(unittest.TestCase):
+class Ambiance:
+    """Le dépôt d'essai : une racine, un dossier temporaire, un éditeur. Sans tests : les bancs qui s'en servent l'héritent sans rejouer ceux des autres."""
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -81,6 +83,8 @@ class Depot(unittest.TestCase):
         (self.d / "editeurs" / (eid + ".toml")).write_text('id = "%s"\nnom = "Acme"\nverifie = %s\ncle = """%s"""\n' % (eid, "true" if verifie else "false", pub), encoding="utf-8")
         return priv
 
+
+class Depot(Ambiance, unittest.TestCase):
     def test_une_archive_signee_par_la_racine_passe_et_se_publie_signee(self):
         archive(self.d, self.priv)
         self.assertEqual(R.main(["verifier"]), 0)
@@ -92,11 +96,13 @@ class Depot(unittest.TestCase):
         self.assertEqual(R.main(["verifier"]), 0)
 
     def test_un_editeur_verifie_est_accepte_une_candidature_non_verifiee_non(self):
-        archive(self.d, self.editeur(verifie=True), mid="chezacme")
+        archive(self.d, self.editeur(verifie=True), mid="acme_outil")
+        (self.d / "provenance").mkdir()
+        (self.d / "provenance" / "acme_outil-1.0.0.toml").write_text('depot = "https://github.com/acme/outil"\ncommit = "%s"\n' % ("a" * 40), encoding="utf-8")
         self.assertEqual(R.main(["verifier"]), 0)
-        shutil.rmtree(self.d / "docs" / "modules" / "chezacme")
+        shutil.rmtree(self.d / "docs" / "modules" / "acme_outil")
         (self.d / "editeurs" / "acme.toml").unlink()
-        archive(self.d, self.editeur(verifie=False), mid="chezacme")
+        archive(self.d, self.editeur(verifie=False), mid="acme_outil")
         self.assertEqual(R.main(["verifier"]), 1)                                   # sa clé n'est pas publiée : l'archive est signée par un inconnu
 
     def test_une_cle_inconnue_une_archive_alteree_un_mauvais_nom_sont_refuses(self):

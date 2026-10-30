@@ -1,0 +1,34 @@
+name: Renouveler la fraîcheur de l'index
+# Chaque jour, une clé à FAIBLE pouvoir signe « l'index publié est toujours le courant » (outils/fraicheur.py).
+# La clé racine, elle, n'est jamais ici. Si ce secret fuit, on peut seulement prolonger la fraîcheur d'un index que la racine a déjà signé.
+# Prérequis : le secret FRAICHEUR_CLE_PRIVEE (le PEM de la clé de fraîcheur) et un index qui annonce cette clé (registre.py publier).
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fraicheur:
+    runs-on: ubuntu-latest
+    if: ${{ vars.FRAICHEUR_ACTIVE == 'oui' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Signer la fraîcheur
+        env:
+          CLE: ${{ secrets.FRAICHEUR_CLE_PRIVEE }}
+        run: |
+          umask 077
+          printf '%s\n' "$CLE" > "$RUNNER_TEMP/fraicheur.pem"
+          python outils/fraicheur.py signer --cle "$RUNNER_TEMP/fraicheur.pem"
+          rm -f "$RUNNER_TEMP/fraicheur.pem"
+      - name: Publier
+        run: |
+          git config user.name "registre-fraicheur"
+          git config user.email "registre@users.noreply.github.com"
+          git add docs/fraicheur.json docs/fraicheur.json.sig
+          git diff --cached --quiet || git commit -m "Fraîcheur de l'index renouvelée"
+          git push
