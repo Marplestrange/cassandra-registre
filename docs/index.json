@@ -2,14 +2,94 @@
  "avis": [],
  "beta": [],
  "editeurs": [],
- "emis": 1793382313,
- "expire": 1808934313,
+ "emis": 1793385146,
+ "expire": 1808937146,
  "format": 1,
  "fraicheur": {
   "cle": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAyKQsG+B2Sg/9mxGbsW2mfwLw0eDY2QKksO1NfVgvG7I=\n-----END PUBLIC KEY-----\n",
   "validite_s": 1209600
  },
  "modules": [
+  {
+   "alertes": [],
+   "api": "",
+   "auteur": "Drisse ATEK",
+   "canal": "stable",
+   "changelog": "",
+   "description": "La billetterie : événements, salles, artistes, revendeurs et formules de rémunération, billets, caisse, contrôle à l'entrée, boutique publique et portefeuille des commissions. Le titulaire de l'instance est l'organisateur ; l'argent est tenu en centimes dans un registre en écriture seule ; Dolibarr est facultatif.",
+   "editeur": "cassandra",
+   "famille": "finance",
+   "icone_trace": "",
+   "id": "billetterie",
+   "importance": "optionnel",
+   "licence": "AGPL-3.0-or-later",
+   "nom": "Billetterie",
+   "noyau_max": "",
+   "noyau_min": "0.1.0",
+   "permissions": {
+    "agir": true,
+    "reseau": [
+     "l'API REST de Dolibarr réglée dans la billetterie (pont facultatif : tiers, factures, paiements, avoirs, commissions), jamais sur le chemin d'un paiement",
+     "l'API de Stripe (api.stripe.com), pour créer la page de paiement hébergée d'une commande",
+     "les API de PayPal (api-m.paypal.com) et de HelloAsso (api.helloasso.com), pour créer la page de paiement et vérifier le paiement au retour de l'acheteur",
+     "le serveur d'envoi de courrier (SMTP) réglé dans la billetterie, pour expédier les billets et les messages aux acheteurs"
+    ],
+    "secrets": true,
+    "stockage": true,
+    "stockage_par_societe": true
+   },
+   "pourcent": 100,
+   "provenance": {},
+   "requiert": [],
+   "sans": "Plus de billetterie : événements, billets et caisse ne sont plus accessibles ; les données restent.",
+   "section": "finance",
+   "sha256": "06ecbd46a5397ba8ad160953a589e17545a71dd2cc7fbc28fada11227841d465",
+   "site": "",
+   "taille": 111244,
+   "url": "modules/billetterie/billetterie-0.1.0.cmod",
+   "version": "0.1.0",
+   "versions": [
+    "0.1.0"
+   ]
+  },
+  {
+   "alertes": [],
+   "api": "",
+   "auteur": "Drisse ATEK",
+   "canal": "stable",
+   "changelog": "",
+   "description": "Le pont vers une instance Dolibarr, par son API REST. Lit (santé, comptes, impayés, objets) et agit : créer et modifier des tiers, contacts, produits, projets, des brouillons de documents, avec preuve et retour arrière. Supprimer passe par une corbeille. Le plafond d'autonomie est le choix de l'administrateur.",
+   "editeur": "cassandra",
+   "famille": "finance",
+   "icone_trace": "",
+   "id": "dolibarr",
+   "importance": "optionnel",
+   "licence": "AGPL-3.0-or-later",
+   "nom": "Dolibarr",
+   "noyau_max": "",
+   "noyau_min": "0.1.0",
+   "permissions": {
+    "privileges": [
+     "la clé d'API de Dolibarr donne les droits de son utilisateur : en faire un utilisateur dédié aux droits limités"
+    ],
+    "reseau": [
+     "l'hôte de l'instance, fixé dans config/dolibarr.conf"
+    ]
+   },
+   "pourcent": 100,
+   "provenance": {},
+   "requiert": [],
+   "sans": "Plus de lien avec Dolibarr : factures, tiers et impayés ne remontent plus.",
+   "section": "finance",
+   "sha256": "e3c340de9bb413267ab05c64088414c49b1ee7a5f4dfbde11b4b2df3715b660f",
+   "site": "",
+   "taille": 13628,
+   "url": "modules/dolibarr/dolibarr-0.3.1.cmod",
+   "version": "0.3.1",
+   "versions": [
+    "0.3.1"
+   ]
+  },
   {
    "alertes": [],
    "api": "",
@@ -28,7 +108,11 @@
    "noyau_min": "0.1.0",
    "permissions": {},
    "pourcent": 100,
-   "provenance": {},
+   "provenance": {
+    "commit": "a752ecf3022c8ffb3b6023fea6fc87e2e7c32cb3",
+    "depot": "https://github.com/Marplestrange/cassandra-registre",
+    "dossier": "sources/sentinelle"
+   },
    "requiert": [],
    "sans": "Plus de mesure du disque racine ni de constat quand il se remplit.",
    "section": "supervision",
@@ -44,5 +128,5 @@
  ],
  "progressifs": [],
  "revocations": [],
- "serie": 2
+ "serie": 3
 }
